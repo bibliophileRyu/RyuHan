@@ -4,7 +4,7 @@ title: About Me
 permalink: /about/
 ---
 
-## Who is RyuHan
+## Who is Ryu Han
 
 좋아하는 건 책
 
