@@ -4,7 +4,7 @@ title: About Me
 permalink: /about/
 ---
 
-> About me
+> Who is RyuHan
 
 좋아하는 건 책
 완전 채식을 지향한다
