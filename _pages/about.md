@@ -4,7 +4,7 @@ title: About Me
 permalink: /about/
 ---
 
-> Who is RyuHan
+## Who is RyuHan
 
 좋아하는 건 책
 
@@ -23,7 +23,7 @@ permalink: /about/
 
 
 
-> About this blog
+## About this blog
 
 데이터를 공부하는 블로그다
 
