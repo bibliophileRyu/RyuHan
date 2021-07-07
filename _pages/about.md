@@ -4,8 +4,19 @@ title: About Me
 permalink: /about/
 ---
 
-This website is powered by **[fastpages](https://github.com/fastai/fastpages)** [^1].
+## About me
 
+좋아하는 건 책
+완전 채식을 지향한다
 
+기자로 일했고
+데이터를 공부한다
 
-[^1]:a blogging platform that natively supports Jupyter notebooks in addition to other formats.
+지구에
+무해한 사람이 되고 싶다
+
+## About this blog
+
+데이터를 공부하는 블로그다
+기술을 통해 사회와 사람들을 탐구한다 
+
