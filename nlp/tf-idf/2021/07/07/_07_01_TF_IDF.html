@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>TF-IDF를 이용한 문서간 유사도 | RyuHan</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="TF-IDF를 이용한 문서간 유사도" />
+<meta name="author" content="RyuHan" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Awesome summary" />
+<meta property="og:description" content="Awesome summary" />
+<link rel="canonical" href="https://bibliophileryu.github.io/RyuHan/nlp/tf-idf/2021/07/07/_07_01_TF_IDF.html" />
+<meta property="og:url" content="https://bibliophileryu.github.io/RyuHan/nlp/tf-idf/2021/07/07/_07_01_TF_IDF.html" />
+<meta property="og:site_name" content="RyuHan" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-07-07T00:00:00-05:00" />
+<script type="application/ld+json">
+{"description":"Awesome summary","url":"https://bibliophileryu.github.io/RyuHan/nlp/tf-idf/2021/07/07/_07_01_TF_IDF.html","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"https://bibliophileryu.github.io/RyuHan/nlp/tf-idf/2021/07/07/_07_01_TF_IDF.html"},"headline":"TF-IDF를 이용한 문서간 유사도","dateModified":"2021-07-07T00:00:00-05:00","datePublished":"2021-07-07T00:00:00-05:00","author":{"@type":"Person","name":"RyuHan"},"@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/RyuHan/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://bibliophileryu.github.io/RyuHan/feed.xml" title="RyuHan" /><link rel="shortcut icon" type="image/x-icon" href="/RyuHan/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/RyuHan/">RyuHan</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/RyuHan/about/">About Me</a><a class="page-link" href="/RyuHan/gitInfo/">gitInfo</a><a class="page-link" href="/RyuHan/sample/">Sample</a><a class="page-link" href="/RyuHan/search/">Search</a><a class="page-link" href="/RyuHan/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">TF-IDF를 이용한 문서간 유사도</h1><p class="page-description">Awesome summary</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2021-07-07T00:00:00-05:00" itemprop="datePublished">
+        Jul 7, 2021
+      </time>• 
+          <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+            <span class="p-author h-card" itemprop="name">RyuHan</span></span>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      5 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/RyuHan/categories/#NLP">NLP</a>
+        &nbsp;
+      
+        <a class="category-tags-link" href="/RyuHan/categories/#TF-IDF">TF-IDF</a>
+        
+      
+      </p>
+    
+
+    
+      
+        <div class="pb-5 d-flex flex-wrap flex-justify-end">
+          <div class="px-2">
+
+    <a href="https://github.com/bibliophileRyu/RyuHan/tree/master/_notebooks/2021_07_01_TF_IDF.ipynb" role="button" target="_blank">
+<img class="notebook-badge-image" src="/RyuHan/assets/badges/github.svg" alt="View On GitHub">
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://mybinder.org/v2/gh/bibliophileRyu/RyuHan/master?filepath=_notebooks%2F2021_07_01_TF_IDF.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/RyuHan/assets/badges/binder.svg" alt="Open In Binder"/>
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://colab.research.google.com/github/bibliophileRyu/RyuHan/blob/master/_notebooks/2021_07_01_TF_IDF.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/RyuHan/assets/badges/colab.svg" alt="Open In Colab"/>
+    </a>
+</div>
+        </div>
+      </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul class="section-nav">
+<li class="toc-entry toc-h2"><a href="#자연어(텍스트)를-계산-가능한-언어로-인코딩하기">자연어(텍스트)를 계산 가능한 언어로 인코딩하기 </a></li>
+</ul><!--
+#################################################
+### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
+#################################################
+# file to edit: _notebooks/2021_07_01_TF_IDF.ipynb
+-->
+
+<div class="container" id="notebook-container">
+        
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="자연어(텍스트)를-계산-가능한-언어로-인코딩하기">
+<a class="anchor" href="#%EC%9E%90%EC%97%B0%EC%96%B4(%ED%85%8D%EC%8A%A4%ED%8A%B8)%EB%A5%BC-%EA%B3%84%EC%82%B0-%EA%B0%80%EB%8A%A5%ED%95%9C-%EC%96%B8%EC%96%B4%EB%A1%9C-%EC%9D%B8%EC%BD%94%EB%94%A9%ED%95%98%EA%B8%B0" aria-hidden="true"><span class="octicon octicon-link"></span></a>자연어(텍스트)를 계산 가능한 언어로 인코딩하기<a class="anchor-link" href="#%EC%9E%90%EC%97%B0%EC%96%B4(%ED%85%8D%EC%8A%A4%ED%8A%B8)%EB%A5%BC-%EA%B3%84%EC%82%B0-%EA%B0%80%EB%8A%A5%ED%95%9C-%EC%96%B8%EC%96%B4%EB%A1%9C-%EC%9D%B8%EC%BD%94%EB%94%A9%ED%95%98%EA%B8%B0"> </a>
+</h2>
+<p>자연어처리(NLP)를 위해서는 텍스트 데이터를 계산 가능한 언어로 바꿔야 한다. 즉, 숫자 <strong>벡터</strong>로 바꿔, 문서를 벡터 공간에 표현할 수 있다.</p>
+<p>텍스트 데이터를 숫자 벡터로 바꾸는 '인코딩'에는 여러 가지 방법이 있다.</p>
+<p>가장 간단한 방법이 문서 집합에서 단어 토큰을 생성하고 각 단어의 수를 세어 BOW(Bag of Words) 인코딩 벡터를 만드는 것이다. 사이킷런의 CountVectorizer 클래스를 사용하면 쉽게 할 수 있다.</p>
+<p>이 방법에서 한 단계 나아간 방법이 TF-IDF를 이용해 단어 가중치까지 반영하는 방법이 있다.</p>
+<p>TF-IDF는 Term Frequency - Inverse Document Frequency)로,</p>
+<ul>
+<li>단어 가중치 기법 중 가장 일반적으로 알려진 알고리즘이다. </li>
+<li>특정 문서 내에서 단어 빈도가 높을수록, 전체 문서들에는 그 단어를 포함한 문서가 적을수록 TF-IDF 값이 높아진다. </li>
+<li>이 값을 이용해 모든 문서에 나타나는 흔한 단어들을 걸러내며, 특정 단어가 가지는 중요도를 측정하는 데 사용된다. </li>
+</ul>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="kn">from</span> <span class="nn">google.colab</span> <span class="kn">import</span> <span class="n">drive</span>
+<span class="n">drive</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span><span class="s1">'/content/drive'</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Mounted at /content/drive
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">'/content/drive/MyDrive/data/test_text.txt'</span><span class="p">,</span> <span class="s1">'r'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+  <span class="n">corpus</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="n">corpus</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>'Let me add some English sentences too!'</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.feature_extraction.text</span> <span class="kn">import</span> <span class="n">TfidfVectorizer</span>
+
+<span class="n">text</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'토마스 만은 평의원이며 곡물 상인이었던 토마스 요한 하인리히 만과 율리아 다 실바 브룬스 부부 사이에서 두 번째 아들로 독일의 뤼베크에서 태어났다.'</span><span class="p">,</span> <span class="c1"># Doc[0] </span>
+        <span class="s1">'어머니 율리아는 7살 때 독일로 망명한 부분적 독일계 브라질리안이다.'</span><span class="p">,</span> <span class="c1"># Doc[1] </span>
+        <span class="s1">'토마스 만의 아버지가 1891년에 돌아가시면서 회사는 청산되었다.'</span><span class="p">,</span> <span class="c1"># Doc[2]</span>
+        <span class="s1">'1893년 뮌헨으로 이주하여 보험 회사의 견습 사원이 되었다.'</span><span class="p">,</span> <span class="c1"># Doc[3]</span>
+        <span class="s1">'이때 첫 작품 &lt;호의&gt;가 잡지에 실리면서 문단에 데뷔하였다.'</span><span class="p">]</span> <span class="c1"># Doc[4]</span>
+
+
+<span class="n">tfidf_vectorizer</span> <span class="o">=</span> <span class="n">TfidfVectorizer</span><span class="p">()</span> <span class="c1"># TF-IDF 객체 선언</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="n">tfidf_vectorizer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="c1"># 단어를 학습시킴</span>
+<span class="n">tfidf_vectorizer</span><span class="o">.</span><span class="n">vocabulary_</span> <span class="c1"># 단어사전을 출력</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>{'1891년에': 0,
+ '1893년': 1,
+ '7살': 2,
+ '견습': 3,
+ '곡물': 4,
+ '데뷔하였다': 5,
+ '독일계': 6,
+ '독일로': 7,
+ '독일의': 8,
+ '돌아가시면서': 9,
+ '되었다': 10,
+ '뤼베크에서': 11,
+ '만과': 12,
+ '만은': 13,
+ '만의': 14,
+ '망명한': 15,
+ '문단에': 16,
+ '뮌헨으로': 17,
+ '번째': 18,
+ '보험': 19,
+ '부부': 20,
+ '부분적': 21,
+ '브라질리안이다': 22,
+ '브룬스': 23,
+ '사원이': 24,
+ '사이에서': 25,
+ '상인이었던': 26,
+ '실리면서': 27,
+ '실바': 28,
+ '아들로': 29,
+ '아버지가': 30,
+ '어머니': 31,
+ '요한': 32,
+ '율리아': 33,
+ '율리아는': 34,
+ '이때': 35,
+ '이주하여': 36,
+ '작품': 37,
+ '잡지에': 38,
+ '청산되었다': 39,
+ '태어났다': 40,
+ '토마스': 41,
+ '평의원이며': 42,
+ '하인리히': 43,
+ '호의': 44,
+ '회사는': 45,
+ '회사의': 46}</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="nb">sorted</span><span class="p">(</span><span class="n">tfidf_vectorizer</span><span class="o">.</span><span class="n">vocabulary_</span><span class="o">.</span><span class="n">items</span><span class="p">())</span> <span class="c1"># 단어사전 정렬</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>[('1891년에', 0),
+ ('1893년', 1),
+ ('7살', 2),
+ ('견습', 3),
+ ('곡물', 4),
+ ('데뷔하였다', 5),
+ ('독일계', 6),
+ ('독일로', 7),
+ ('독일의', 8),
+ ('돌아가시면서', 9),
+ ('되었다', 10),
+ ('뤼베크에서', 11),
+ ('만과', 12),
+ ('만은', 13),
+ ('만의', 14),
+ ('망명한', 15),
+ ('문단에', 16),
+ ('뮌헨으로', 17),
+ ('번째', 18),
+ ('보험', 19),
+ ('부부', 20),
+ ('부분적', 21),
+ ('브라질리안이다', 22),
+ ('브룬스', 23),
+ ('사원이', 24),
+ ('사이에서', 25),
+ ('상인이었던', 26),
+ ('실리면서', 27),
+ ('실바', 28),
+ ('아들로', 29),
+ ('아버지가', 30),
+ ('어머니', 31),
+ ('요한', 32),
+ ('율리아', 33),
+ ('율리아는', 34),
+ ('이때', 35),
+ ('이주하여', 36),
+ ('작품', 37),
+ ('잡지에', 38),
+ ('청산되었다', 39),
+ ('태어났다', 40),
+ ('토마스', 41),
+ ('평의원이며', 42),
+ ('하인리히', 43),
+ ('호의', 44),
+ ('회사는', 45),
+ ('회사의', 46)]</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="n">tf_idf_array</span> <span class="o">=</span> <span class="n">tfidf_vectorizer</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span> <span class="c1"># TF-IDF를 이용해 단어 가중치가 적용된 숫자 벡터를 어레이 형태로 보자 </span>
+<span class="n">tf_idf_array</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>array([[0.        , 0.        , 0.        , 0.        , 0.22585586,
+        0.        , 0.        , 0.        , 0.22585586, 0.        ,
+        0.        , 0.22585586, 0.22585586, 0.22585586, 0.        ,
+        0.        , 0.        , 0.        , 0.22585586, 0.        ,
+        0.22585586, 0.        , 0.        , 0.22585586, 0.        ,
+        0.22585586, 0.22585586, 0.        , 0.22585586, 0.22585586,
+        0.        , 0.        , 0.22585586, 0.22585586, 0.        ,
+        0.        , 0.        , 0.        , 0.        , 0.        ,
+        0.22585586, 0.36443818, 0.22585586, 0.22585586, 0.        ,
+        0.        , 0.        ],
+       [0.        , 0.        , 0.35355339, 0.        , 0.        ,
+        0.        , 0.35355339, 0.35355339, 0.        , 0.        ,
+        0.        , 0.        , 0.        , 0.        , 0.        ,
+        0.35355339, 0.        , 0.        , 0.        , 0.        ,
+        0.        , 0.35355339, 0.35355339, 0.        , 0.        ,
+        0.        , 0.        , 0.        , 0.        , 0.        ,
+        0.        , 0.35355339, 0.        , 0.        , 0.35355339,
+        0.        , 0.        , 0.        , 0.        , 0.        ,
+        0.        , 0.        , 0.        , 0.        , 0.        ,
+        0.        , 0.        ],
+       [0.38775666, 0.        , 0.        , 0.        , 0.        ,
+        0.        , 0.        , 0.        , 0.        , 0.38775666,
+        0.        , 0.        , 0.        , 0.        , 0.38775666,
+        0.        , 0.        , 0.        , 0.        , 0.        ,
+        0.        , 0.        , 0.        , 0.        , 0.        ,
+        0.        , 0.        , 0.        , 0.        , 0.        ,
+        0.38775666, 0.        , 0.        , 0.        , 0.        ,
+        0.        , 0.        , 0.        , 0.        , 0.38775666,
+        0.        , 0.31283963, 0.        , 0.        , 0.        ,
+        0.38775666, 0.        ],
+       [0.        , 0.35355339, 0.        , 0.35355339, 0.        ,
+        0.        , 0.        , 0.        , 0.        , 0.        ,
+        0.35355339, 0.        , 0.        , 0.        , 0.        ,
+        0.        , 0.        , 0.35355339, 0.        , 0.35355339,
+        0.        , 0.        , 0.        , 0.        , 0.35355339,
+        0.        , 0.        , 0.        , 0.        , 0.        ,
+        0.        , 0.        , 0.        , 0.        , 0.        ,
+        0.        , 0.35355339, 0.        , 0.        , 0.        ,
+        0.        , 0.        , 0.        , 0.        , 0.        ,
+        0.        , 0.35355339],
+       [0.        , 0.        , 0.        , 0.        , 0.        ,
+        0.37796447, 0.        , 0.        , 0.        , 0.        ,
+        0.        , 0.        , 0.        , 0.        , 0.        ,
+        0.        , 0.37796447, 0.        , 0.        , 0.        ,
+        0.        , 0.        , 0.        , 0.        , 0.        ,
+        0.        , 0.        , 0.37796447, 0.        , 0.        ,
+        0.        , 0.        , 0.        , 0.        , 0.        ,
+        0.37796447, 0.        , 0.37796447, 0.37796447, 0.        ,
+        0.        , 0.        , 0.        , 0.        , 0.37796447,
+        0.        , 0.        ]])</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>TF-IDF 알고리즘을 이용해 숫자 벡터로 인코딩을 마친 위 데이터간 유사도를 살펴보자.</p>
+<p>이를 위해, 코사인 유사도를 구해보자</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">dot</span>
+<span class="kn">from</span> <span class="nn">numpy.linalg</span> <span class="kn">import</span> <span class="n">norm</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">def</span> <span class="nf">cos_sim</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
+       <span class="k">return</span> <span class="n">dot</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">norm</span><span class="p">(</span><span class="n">A</span><span class="p">)</span><span class="o">*</span><span class="n">norm</span><span class="p">(</span><span class="n">B</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="n">doc1</span><span class="o">=</span> <span class="n">tf_idf_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">doc2</span><span class="o">=</span> <span class="n">tf_idf_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">doc3</span><span class="o">=</span> <span class="n">tf_idf_array</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">doc4</span> <span class="o">=</span> <span class="n">tf_idf_array</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-python"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">cos_sim</span><span class="p">(</span><span class="n">doc1</span><span class="p">,</span> <span class="n">doc2</span><span class="p">))</span> <span class="c1">#문서1과 문서2의 코사인 유사도</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">cos_sim</span><span class="p">(</span><span class="n">doc1</span><span class="p">,</span> <span class="n">doc3</span><span class="p">))</span> <span class="c1">#문서1과 문서3의 코사인 유사도</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">cos_sim</span><span class="p">(</span><span class="n">doc2</span><span class="p">,</span> <span class="n">doc3</span><span class="p">))</span> <span class="c1">#문서2과 문서3의 코사인 유사도</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">cos_sim</span><span class="p">(</span><span class="n">doc3</span><span class="p">,</span> <span class="n">doc4</span><span class="p">))</span> <span class="c1">#문서3과 문서4의 코사인 유사도</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>0.0
+0.11401070555406811
+0.0
+0.0
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+</div>
+
+
+
+  </div><!-- from https://github.com/utterance/utterances 
+<script src="https://utteranc.es/client.js"
+        repo="bibliophileRyu/RyuHan"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script> -->
+
+<div id="disqus_thread"></div>
+<script>
+    /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables    */
+    /*
+    var disqus_config = function () {
+    this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
+    this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() { // DON'T EDIT BELOW THIS LINE
+    var d = document, s = d.createElement('script');
+    s.src = 'https://ryuhan.disqus.com/embed.js';
+    s.setAttribute('data-timestamp', +new Date());
+    (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a class="u-url" href="/RyuHan/nlp/tf-idf/2021/07/07/_07_01_TF_IDF.html" hidden></a>
+</article>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/RyuHan/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/RyuHan/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/RyuHan/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>An easy to use blogging platform with support for Jupyter Notebooks.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/https%3A%2F%2Fgithub.com%2FbibliophileRyu" title="https://github.com/bibliophileRyu"><svg class="svg-icon grey"><use xlink:href="/RyuHan/assets/minima-social-icons.svg#github"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
