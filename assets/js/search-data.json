@@ -97,17 +97,6 @@
   
 
   
-      ,"page4": {
-          "title": "Sample",
-          "content": "hellow world . hellow world | hellow world | hellow world | .",
-          "url": "https://bibliophileryu.github.io/RyuHan/sample/",
-          "relUrl": "/sample/",
-          "date": ""
-      }
-      
-  
-
-  
   
 
   
@@ -127,7 +116,7 @@
   
 
   
-      ,"page12": {
+      ,"page11": {
           "title": "",
           "content": "Sitemap: {{ “sitemap.xml” | absolute_url }} | .",
           "url": "https://bibliophileryu.github.io/RyuHan/robots.txt",
